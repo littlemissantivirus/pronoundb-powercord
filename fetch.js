@@ -25,6 +25,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+const fs = require('fs')
 const { get: porkordGet } = require('powercord/http')
 const { Endpoints } = require('./constants')
 
@@ -67,11 +68,21 @@ async function fetchPronounsBulk (ids) {
   if (toFetch.length > 0) {
     const data = await get(Endpoints.LOOKUP_BULK(toFetch))
     for (const id of toFetch) {
-      const pronouns = data[id] ?? "ns"
+      const pronouns = data[id] ?? 'ns'
       def[id].resolve(pronouns)
       res[id] = pronouns
     }
   }
+
+  fs.readFile(__dirname + '/pronouns.json', 'utf8', (err, data) => {
+    if (err) throw err;
+
+    data = JSON.parse(data);
+    var keys = Object.keys(data);
+    for (const key of keys) {
+      cache[keys] = data[key]
+    }
+  })
 
   return res
 }
